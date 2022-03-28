@@ -5,10 +5,10 @@
 
 ## In progress
 
+- Add a webpage saying Hello
 
 ## TODO
 
-- Add a webpage saying Hello
 - Add a basic username/password authentication system
 - Add an ingredient
 - Add a recipe
