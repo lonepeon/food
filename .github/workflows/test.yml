@@ -23,6 +23,7 @@ jobs:
           chmod u+x ci-tools/assert-version
 
   file-generation-tests:
+    needs: ci-tools
     runs-on: "ubuntu-latest"
     steps:
       - name: "checkout code"
@@ -43,6 +44,7 @@ jobs:
         run: make test-generate
 
   integration-tests:
+    needs: ci-tools
     runs-on: "ubuntu-latest"
     steps:
       - name: "checkout code"
@@ -63,6 +65,7 @@ jobs:
         run: make test-integration
 
   format-tests:
+    needs: ci-tools
     runs-on: "ubuntu-latest"
     steps:
       - name: "checkout code"
@@ -87,6 +90,7 @@ jobs:
         run: make test-security
 
   unit-tests:
+    needs: ci-tools
     runs-on: "ubuntu-latest"
     steps:
       - name: "checkout code"

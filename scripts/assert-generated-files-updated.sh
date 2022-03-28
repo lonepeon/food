@@ -7,6 +7,7 @@ source "${currentFolderPath}/commons.sh"
 
 if [ 0 -ne $(git status --porcelain --untracked-files | wc -l) ]; then
   >&2 fail "aborting: git status is not clean";
+  git status --porcelain --untracked-files
   exit 1;
 fi
 
