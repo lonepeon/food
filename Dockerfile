@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y sqlite3
 
 COPY . .
 
-RUN go build -o food
-RUN cp ./food /usr/local/bin/food
+RUN go build -o food-${GOOS}-${GOARCH}
+RUN cp ./food-${GOOS}-${GOARCH} /usr/local/bin/food
 
 CMD /usr/local/bin/food
