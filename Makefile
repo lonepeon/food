@@ -1,5 +1,38 @@
 GO_BIN := go
 
+ifdef SSH_KNOWN_HOSTS
+	SSH_KNOWN_HOST_OPTION := -o UserKnownHostsFile=$(SSH_KNOWN_HOSTS)
+endif
+
+.PHONY: deploy
+deploy:
+ifndef VERSION
+	$(error VERSION variable is not set)
+endif
+ifndef SSH_KEY_PATH
+	$(error SSH_KEY_PATH variable is not set)
+endif
+ifndef DEPLOY_SERVER
+	$(error DEPLOY_SERVER variable is not set)
+endif
+	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- mkdir -p /var/lib/food/$(VERSION); \
+	scp $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) food-linux-amd64 $(DEPLOY_SERVER):/var/lib/food/$(VERSION)/food; \
+	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- chown -R app:app /var/lib/food/$(VERSION); \
+	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- ln -fs /var/lib/food/$(VERSION)/food /var/lib/food/food; \
+	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- systemctl restart food; \
+	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- bash -c 'ls --sort time | grep '^20' | tail -n +3 | xargs rm -fr'
+
+.PHONY: food-linux-amd64
+food-linux-amd64: food-builder
+	@mkdir -p target
+	docker run --rm -v "$$PWD/target":/usr/local/bin \
+		food-builder:latest \
+		cp /go/src/food/$@ /usr/local/bin/$@
+
+.PHONY: food-builder
+food-builder:
+	docker build -t food-builder:latest .
+
 .PHONY: dev-golib-on
 dev-golib-on:
 	@go mod edit -replace github.com/lonepeon/golib=../golib
@@ -23,10 +56,15 @@ test: test-unit test-integration test-format test-lint test-security
 .PHONY: test-acceptance
 test-acceptance:
 	@echo $@
+	@docker-compose restart acceptance-tests-runner
+	@docker-compose exec -T -- acceptance-tests-runner bash -c 'npm install && npm run test'
 
 .PHONY: test-acceptance-deps
 test-acceptance-deps:
 	@echo $@
+	@docker-compose down
+	@docker-compose build
+	@docker-compose up --scale webapp=1 --scale acceptance-tests-runner=1 --detach
 
 .PHONY: test-integration
 test-integration:

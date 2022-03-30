@@ -4,3 +4,5 @@
 /food.sqlite
 /ci-tools/
 /cd-tools/
+/.env
+/node_modules
