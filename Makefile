@@ -16,7 +16,7 @@ ifndef DEPLOY_SERVER
 	$(error DEPLOY_SERVER variable is not set)
 endif
 	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- mkdir -p /var/lib/food/$(VERSION); \
-	scp $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) food-linux-amd64 $(DEPLOY_SERVER):/var/lib/food/$(VERSION)/food; \
+	scp $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) target/food-linux-amd64 $(DEPLOY_SERVER):/var/lib/food/$(VERSION)/food; \
 	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- chown -R app:app /var/lib/food/$(VERSION); \
 	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- ln -fs /var/lib/food/$(VERSION)/food /var/lib/food/food; \
 	ssh $(SSH_KNOWN_HOST_OPTION) -i $(SSH_KEY_PATH) $(DEPLOY_SERVER) -- systemctl restart food; \
