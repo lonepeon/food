@@ -1,0 +1,29 @@
+version: '3.2'
+
+services:
+  webapp:
+    build: .
+    image: food:acceptance-tests
+    ports:
+      - '9010:8080'
+    deploy:
+      replicas: 0
+    environment:
+      FOOD_SESSION_KEY: 'averyveryverylongkeyformywebcookiesbecausesecurityisimportant'
+      FOOD_WEB_ADDR: ':8080'
+
+  acceptance-tests-runner:
+    image: cimg/node:16.13.2-browsers
+    deploy:
+      replicas: 0
+    depends_on:
+      - webapp
+    environment:
+      ACCEPTANCE_TEST_SERVER_URL: 'http://webapp:8080'
+    volumes:
+      - .:/src
+    entrypoint: >
+      /bin/sh -c "
+      cp -r /src/package.json /src/package-lock.json /src/acceptance-tests .;
+      sleep infinity;
+      "
