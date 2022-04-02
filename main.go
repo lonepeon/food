@@ -2,26 +2,31 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"embed"
 	"fmt"
-	"math"
+	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/gorilla/sessions"
+	_ "github.com/mattn/go-sqlite3" // sqlite3 adapter
 
 	"github.com/lonepeon/food/internal/infrastructure/www"
 	"github.com/lonepeon/golib/env"
 	"github.com/lonepeon/golib/logger"
+	"github.com/lonepeon/golib/sqlutil"
 	"github.com/lonepeon/golib/web"
+	"github.com/lonepeon/golib/web/sessionstore"
 )
 
 type Config struct {
-	WebAddress       string `env:"FOOD_WEB_ADDR,required=true"`
-	SessionStorePath string `env:"FOOD_SESSION_STORE_PATH,default=./tmp/sessions"`
-	SessionKey       string `env:"FOOD_SESSION_KEY,required=true"`
+	SQLitePath string `env:"FOOD_SQLITE_PATH,default=./food.sqlite"`
+	WebAddress string `env:"FOOD_WEB_ADDR,required=true"`
+	SessionKey string `env:"FOOD_SESSION_KEY,required=true"`
 }
 
 //go:embed templates/*
@@ -49,8 +54,16 @@ func run() error {
 		return fmt.Errorf("can't load config: %v", err)
 	}
 
-	var sessionstore = sessions.NewFilesystemStore(cfg.SessionStorePath, []byte(cfg.SessionKey))
-	sessionstore.MaxLength(math.MaxInt64)
+	log.Infof("initialize database from %v", cfg.SQLitePath)
+	db, err := initDatabase(log, cfg.SQLitePath)
+	if err != nil {
+		return fmt.Errorf("can't initialize database: %v", err)
+	}
+
+	var sessionstore = sessionstore.NewSQLite(db, sessions.Options{
+		HttpOnly: true,
+		MaxAge:   1 * 60 * 60 * 24 * 2,
+	}, []byte(cfg.SessionKey))
 
 	webServer := initWebServer(log, sessionstore)
 	webServer.HandleFunc("GET", "/", www.RecipeIndex())
@@ -58,7 +71,7 @@ func run() error {
 	return waitForServersShutdown(log, webServer, cfg.WebAddress)
 }
 
-func initWebServer(log *logger.Logger, sessionstore *sessions.FilesystemStore) *web.Server {
+func initWebServer(log *logger.Logger, sessionstore sessions.Store) *web.Server {
 	tmpl := web.TmplConfiguration{
 		FS:                          htmlTemplateFS,
 		Layout:                      "templates/layout.html.tmpl",
@@ -111,4 +124,29 @@ func spawnWebServer(log *logger.Logger, server *web.Server, webAddress string, r
 	}
 
 	return start, stop
+}
+
+func initDatabase(log *logger.Logger, sqlitePath string) (*sql.DB, error) {
+	options := make(url.Values)
+	// busy_timeout is used to wait for a little bit when SQLite is backing up the data
+	// instead of rejecting a transaction as soon as we access a locked row.
+	options.Add("_busy_timeout", "3000")
+	options.Add("_foreign_keys", "true")
+	// journal_mode wal is enabled to let SQLite back up run properly
+	options.Add("_journal_mode", "wal")
+	// synchronous normal means fsync() call are only called when WAL becomes full
+	options.Add("_synchronous", "NORMAL")
+
+	db, err := sql.Open("sqlite3", sqlitePath+"?"+options.Encode())
+	if err != nil {
+		return nil, fmt.Errorf("can't open  sqlite file: %v", err)
+	}
+
+	sessionStoreMigrationsVersions, err := sqlutil.ExecuteMigrations(context.Background(), db, sessionstore.Migrations())
+	if err != nil {
+		return nil, fmt.Errorf("can't run session store migrations: %v", err)
+	}
+	log.Infof("database executed new sql session store migrations %s", strings.Join(sessionStoreMigrationsVersions, ", "))
+
+	return db, nil
 }

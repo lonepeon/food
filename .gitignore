@@ -1,7 +1,7 @@
 /dist
 /target
 /tmp
-/food.sqlite
+/food.sqlite*
 /ci-tools/
 /cd-tools/
 /.env

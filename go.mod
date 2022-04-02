@@ -6,7 +6,8 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.45.2
 	github.com/gorilla/sessions v1.2.1
-	github.com/lonepeon/golib v0.0.0-20220316135936-0c777ccb25ef
+	github.com/lonepeon/golib v0.0.0-20220402200803-2f4e573c256e
+	github.com/mattn/go-sqlite3 v1.9.0
 	golang.org/x/tools v0.1.10
 	honnef.co/go/tools v0.2.2
 )

@@ -2,10 +2,11 @@
 
 ## Done 
 
+- Add a webpage saying Hello
 
 ## In progress
 
-- Add a webpage saying Hello
+n/a
 
 ## TODO
 

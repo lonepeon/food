@@ -319,13 +319,15 @@ github.com/leonklingele/grouper/pkg/analyzer/globals
 github.com/leonklingele/grouper/pkg/analyzer/imports
 github.com/leonklingele/grouper/pkg/analyzer/types
 github.com/leonklingele/grouper/pkg/analyzer/vars
-# github.com/lonepeon/golib v0.0.0-20220316135936-0c777ccb25ef
+# github.com/lonepeon/golib v0.0.0-20220402200803-2f4e573c256e
 ## explicit; go 1.17
 github.com/lonepeon/golib/env
 github.com/lonepeon/golib/logger
+github.com/lonepeon/golib/sqlutil
 github.com/lonepeon/golib/sqlutil/cmd/sql-migration
 github.com/lonepeon/golib/testutils
 github.com/lonepeon/golib/web
+github.com/lonepeon/golib/web/sessionstore
 github.com/lonepeon/golib/web/webtest
 # github.com/magiconair/properties v1.8.5
 ## explicit; go 1.13
@@ -345,6 +347,9 @@ github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.9
 ## explicit; go 1.9
 github.com/mattn/go-runewidth
+# github.com/mattn/go-sqlite3 v1.9.0
+## explicit
+github.com/mattn/go-sqlite3
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 ## explicit
 github.com/matttproud/golang_protobuf_extensions/pbutil
