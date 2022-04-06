@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -20,13 +21,15 @@ import (
 	"github.com/lonepeon/golib/logger"
 	"github.com/lonepeon/golib/sqlutil"
 	"github.com/lonepeon/golib/web"
+	"github.com/lonepeon/golib/web/authenticationstore"
 	"github.com/lonepeon/golib/web/sessionstore"
 )
 
 type Config struct {
-	SQLitePath string `env:"FOOD_SQLITE_PATH,default=./food.sqlite"`
-	WebAddress string `env:"FOOD_WEB_ADDR,required=true"`
-	SessionKey string `env:"FOOD_SESSION_KEY,required=true"`
+	SQLitePath           string `env:"FOOD_SQLITE_PATH,default=./food.sqlite"`
+	WebAddress           string `env:"FOOD_WEB_ADDR,required=true"`
+	SessionKey           string `env:"FOOD_SESSION_KEY,required=true"`
+	AuthenticationPepper string `env:"FOOD_AUTH_PEPPER,required=true"`
 }
 
 //go:embed templates/*
@@ -60,13 +63,32 @@ func run() error {
 		return fmt.Errorf("can't initialize database: %v", err)
 	}
 
-	var sessionstore = sessionstore.NewSQLite(db, sessions.Options{
+	sessionstore := sessionstore.NewSQLite(db, sessions.Options{
 		HttpOnly: true,
 		MaxAge:   1 * 60 * 60 * 24 * 2,
 	}, []byte(cfg.SessionKey))
 
+	authenticationBrowserStore := web.NewCurrentAuthenticatedUserSessionStore(sessionstore)
+	authenticationBackendstore := authenticationstore.NewSQLite(db, cfg.AuthenticationPepper)
+
+	authentication := web.NewAuthentication(authenticationBrowserStore, authenticationBackendstore, "templates/authentication/login.html.tmpl")
+
+	if _, err := sqlutil.ExecuteMigrations(context.Background(), db, authenticationstore.Migrations()); err != nil {
+		return fmt.Errorf("can't run authentication schema migrations: %v", err)
+	}
+
+	if _, err := authenticationBackendstore.Register("admin", "admin"); err != nil {
+		if !errors.Is(err, web.ErrUserAlreadyExist) {
+			return fmt.Errorf("can't create default user: %v", err)
+		}
+	}
+
 	webServer := initWebServer(log, sessionstore)
 	webServer.HandleFunc("GET", "/", www.RecipeIndex())
+	webServer.HandleFunc("GET", "/admin/login/new", authentication.ShowLoginPage("/admin"))
+	webServer.HandleFunc("POST", "/admin/login", authentication.Login("/admin"))
+	webServer.HandleFunc("GET", "/admin/logout", authentication.Logout("/"))
+	webServer.HandleFunc("GET", "/admin/ingredients", authentication.EnsureAuthentication("/admin/login/new", www.RecipeIndex()))
 
 	return waitForServersShutdown(log, webServer, cfg.WebAddress)
 }

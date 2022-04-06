@@ -11,6 +11,7 @@ services:
     environment:
       FOOD_SESSION_KEY: 'averyveryverylongkeyformywebcookiesbecausesecurityisimportant'
       FOOD_WEB_ADDR: ':8080'
+      FOOD_AUTH_PEPPER: '131a5fb5-3596-4290-b869-47768cd6e7ab'
 
   acceptance-tests-runner:
     image: cimg/node:16.13.2-browsers

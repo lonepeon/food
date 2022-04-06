@@ -6,8 +6,8 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.45.2
 	github.com/gorilla/sessions v1.2.1
-	github.com/lonepeon/golib v0.0.0-20220402200803-2f4e573c256e
-	github.com/mattn/go-sqlite3 v1.9.0
+	github.com/lonepeon/golib v0.0.0-20220406191516-65e2ee52d0f6
+	github.com/mattn/go-sqlite3 v1.14.12
 	golang.org/x/tools v0.1.10
 	honnef.co/go/tools v0.2.2
 )
@@ -154,6 +154,7 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
+	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
