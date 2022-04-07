@@ -150,14 +150,7 @@ func spawnWebServer(log *logger.Logger, server *web.Server, webAddress string, r
 
 func initDatabase(log *logger.Logger, sqlitePath string) (*sql.DB, error) {
 	options := make(url.Values)
-	// busy_timeout is used to wait for a little bit when SQLite is backing up the data
-	// instead of rejecting a transaction as soon as we access a locked row.
-	options.Add("_busy_timeout", "3000")
 	options.Add("_foreign_keys", "true")
-	// journal_mode wal is enabled to let SQLite back up run properly
-	options.Add("_journal_mode", "wal")
-	// synchronous normal means fsync() call are only called when WAL becomes full
-	options.Add("_synchronous", "NORMAL")
 
 	db, err := sql.Open("sqlite3", sqlitePath+"?"+options.Encode())
 	if err != nil {
