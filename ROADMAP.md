@@ -3,6 +3,7 @@
 ## Done 
 
 - Add a webpage saying Hello
+- Add a basic username/password authentication system
 
 ## In progress
 
@@ -10,7 +11,6 @@ n/a
 
 ## TODO
 
-- Add a basic username/password authentication system
 - Add an ingredient
 - Add a recipe
 - Show a recipe
