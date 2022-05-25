@@ -37,7 +37,7 @@ func TestQuantityUnitZeroTrue(t *testing.T) {
 
 	for name, unit := range tcs {
 		t.Run(name, func(t *testing.T) {
-			testutils.AssertEqualBool(t, true, unit.IsZero(), "expecting non zero value")
+			testutils.AssertEqualBool(t, true, unit.IsZero(), "expecting zero value")
 		})
 	}
 }
