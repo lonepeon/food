@@ -24,10 +24,10 @@ func (d RecipeDuration) Resting() time.Duration {
 	return d.resting
 }
 
-func (d RecipeDuration) TotalDuration() time.Duration {
+func (d RecipeDuration) Total() time.Duration {
 	return d.preparation + d.cooking + d.resting
 }
 
 func (d RecipeDuration) String() string {
-	return d.TotalDuration().String()
+	return d.Total().String()
 }

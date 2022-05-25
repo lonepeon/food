@@ -43,7 +43,7 @@ func TestRecipeDurationFields(t *testing.T) {
 	}
 }
 
-func TestRecipeDurationTotalDuration(t *testing.T) {
+func TestRecipeDurationTotal(t *testing.T) {
 	tcs := map[string]struct {
 		preparation time.Duration
 		cooking     time.Duration
@@ -76,7 +76,7 @@ func TestRecipeDurationTotalDuration(t *testing.T) {
 	for name, tc := range tcs {
 		t.Run(name, func(t *testing.T) {
 			duration := domain.NewRecipeDuration(tc.preparation, tc.cooking, tc.resting)
-			testutils.AssertEqualDuration(t, tc.expected, duration.TotalDuration(), "invalid total duration")
+			testutils.AssertEqualDuration(t, tc.expected, duration.Total(), "invalid total duration")
 		})
 	}
 }
