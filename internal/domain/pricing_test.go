@@ -25,15 +25,8 @@ func TestPricingString(t *testing.T) {
 }
 
 func TestPricingZeroTrue(t *testing.T) {
-	tcs := map[string]domain.Pricing{
-		"emptyStruct": {},
-	}
-
-	for name, unit := range tcs {
-		t.Run(name, func(t *testing.T) {
-			testutils.AssertEqualBool(t, true, unit.IsZero(), "expecting zero value")
-		})
-	}
+	var pricing domain.Pricing
+	testutils.AssertEqualBool(t, true, pricing.IsZero(), "expecting zero value")
 }
 
 func TestPricingZeroFalse(t *testing.T) {
