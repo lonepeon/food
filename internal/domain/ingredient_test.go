@@ -45,7 +45,7 @@ func TestNewIngredientSlugZeroError(t *testing.T) {
 	_, err := domain.NewIngredient(domain.IngredientCode{}, "Black tomato")
 	testutils.RequireHasError(t, err, "expecting error")
 
-	testutils.AssertEqualString(t, "code must not be empty", err.Error(), "invalid error message")
+	testutils.AssertErrorIs(t, domain.ErrIngredientCodeNotInitialized, err, "invalid error")
 }
 
 func TestNewIngredientNameError(t *testing.T) {
@@ -53,20 +53,20 @@ func TestNewIngredientNameError(t *testing.T) {
 	testutils.RequireNoError(t, err, "expecting valid code")
 
 	names := map[string]struct {
-		name          string
-		expectedError string
+		name     string
+		expected error
 	}{
 		"empty": {
-			name:          "",
-			expectedError: "name must be greater than 1 character",
+			name:     "",
+			expected: domain.ErrIngredientNameTooSmall,
 		},
 		"tooLong": {
-			name:          strings.Repeat("x", 105),
-			expectedError: "name must be less than 100 characters",
+			name:     strings.Repeat("x", 105),
+			expected: domain.ErrIngredientNameTooBig,
 		},
 		"onlySpaces": {
-			name:          strings.Repeat(" ", 20),
-			expectedError: "name must be greater than 1 character",
+			name:     strings.Repeat(" ", 20),
+			expected: domain.ErrIngredientNameTooSmall,
 		},
 	}
 
@@ -74,7 +74,7 @@ func TestNewIngredientNameError(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			_, err := domain.NewIngredient(code, tc.name)
 			testutils.RequireHasError(t, err, "expecting error")
-			testutils.AssertEqualString(t, tc.expectedError, err.Error(), "invalid error message")
+			testutils.AssertErrorIs(t, tc.expected, err, "invalid error type")
 		})
 	}
 }

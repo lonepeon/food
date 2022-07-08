@@ -54,7 +54,7 @@ func TestNewQuantityError(t *testing.T) {
 			_, err := domain.NewQuantity(tc.value, tc.unit)
 			testutils.RequireHasError(t, err, "expecting an error")
 
-			testutils.AssertEqualString(t, "value must be greater than 0", err.Error(), "unexpected error message")
+			testutils.AssertErrorIs(t, domain.ErrQuantityTooSmall, err, "unexpected error")
 		})
 	}
 }

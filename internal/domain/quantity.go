@@ -1,8 +1,11 @@
 package domain
 
 import (
-	"errors"
 	"fmt"
+)
+
+var (
+	ErrQuantityTooSmall = EInvalid("quantity must be greater than 0")
 )
 
 type Quantity struct {
@@ -12,7 +15,7 @@ type Quantity struct {
 
 func NewQuantity(value float64, unit QuantityUnit) (Quantity, error) {
 	if value <= 0 {
-		return Quantity{}, errors.New("value must be greater than 0")
+		return Quantity{}, ErrQuantityTooSmall
 	}
 
 	return Quantity{value: value, unit: unit}, nil

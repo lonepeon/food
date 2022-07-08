@@ -1,9 +1,16 @@
 package domain
 
 import (
-	"errors"
 	"fmt"
 	"strings"
+)
+
+var (
+	ErrSlugTooSmall              = EInvalid("must be greater than 1 character")
+	ErrSlugTooBig                = EInvalid("must be less than 63 characters")
+	ErrSlugUnusableCharacter     = EInvalid("must only contain lower case alphanumeric characters, and - or .")
+	ErrSlugInvalidFirstCharacter = EInvalid("must start with an alphanumeric character")
+	ErrSlugInvalidLastCharacter  = EInvalid("must end with an alphanumeric character")
 )
 
 // Slug represents a 63 characters maximum string containing alpha-numeric
@@ -38,11 +45,11 @@ func (s Slug) String() string {
 
 func validateSlugLength(s string) error {
 	if len(s) < 1 {
-		return errors.New("must be greater than 1 character")
+		return ErrSlugTooSmall
 	}
 
 	if len(s) > 63 {
-		return errors.New("must be less than 63 characters")
+		return ErrSlugTooBig
 	}
 
 	return nil
@@ -51,7 +58,7 @@ func validateSlugLength(s string) error {
 func validateSlugCharacterSet(s string) error {
 	for i, c := range s {
 		if err := validateSlugCharacterInCharacterSet(c); err != nil {
-			return fmt.Errorf("invalid chracter \"%c\" at index %d: %v", c, i, err)
+			return fmt.Errorf("invalid character \"%c\" at index %d: %w", c, i, err)
 		}
 	}
 
@@ -71,24 +78,24 @@ func validateSlugCharacterInCharacterSet(c rune) error {
 		return nil
 	}
 
-	return errors.New("must only contain lower case alphanumeric characters, and - or .")
+	return ErrSlugUnusableCharacter
 }
 
 func validateSlugCharacterPositions(s string) error {
 	if strings.Contains(s, "--") {
-		return fmt.Errorf("invalid sequence \"--\"")
+		return fmt.Errorf("invalid sequence \"--\": %w", ErrSlugUnusableCharacter)
 	}
 
 	if strings.Contains(s, "..") {
-		return fmt.Errorf("invalid sequence \"..\"")
+		return fmt.Errorf("invalid sequence \"..\": %w", ErrSlugUnusableCharacter)
 	}
 
 	if strings.HasPrefix(s, ".") || strings.HasPrefix(s, "-") {
-		return fmt.Errorf("must start with an alphanumeric character")
+		return ErrSlugInvalidFirstCharacter
 	}
 
 	if strings.HasSuffix(s, ".") || strings.HasSuffix(s, "-") {
-		return fmt.Errorf("must end with an alphanumeric character")
+		return ErrSlugInvalidLastCharacter
 	}
 
 	return nil
