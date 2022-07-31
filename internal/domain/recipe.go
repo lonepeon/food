@@ -1,5 +1,9 @@
 package domain
 
+var (
+	ErrRecipeCodeNotInitialized = EInternal("code must not be zero")
+)
+
 type RecipeCode struct {
 	Slug
 }
